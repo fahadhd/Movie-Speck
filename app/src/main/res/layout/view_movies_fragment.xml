@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,12 +6,19 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.fahadhd.moviesearch.MainActivityFragment"
+    tools:context=".ViewMoviesFragment"
     tools:showIn="@layout/activity_main">
 
-    <TextView
+
+    <GridView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:id="@+id/movieGrid"
+        android:layout_gravity="left|top"
+        android:numColumns="auto_fit"
+        android:horizontalSpacing="0dp"
+        android:verticalSpacing="0dp"
+        android:columnWidth="120dp"
+        android:stretchMode="spacingWidthUniform"/>
 
-</RelativeLayout>
+</FrameLayout>
