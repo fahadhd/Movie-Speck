@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.net.ConnectivityManagerCompat;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,7 +41,7 @@ import java.util.Arrays;
 public class ViewMoviesFragment extends Fragment {
     GridView movieGrid;
     static int width;
-    boolean sortByPop;
+    boolean sortByPop = true;
     static String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
     public ViewMoviesFragment() {
     }
@@ -196,7 +199,16 @@ public class ViewMoviesFragment extends Fragment {
             }
         }
         public String[] getPathsFromJSON(String JSONResult) throws JSONException{
-            return null;
+            String[] result;
+            JSONObject root = new JSONObject(JSONResult);
+            JSONArray movies = root.getJSONArray("results");
+            result = new String[movies.length()];
+
+            for(int i = 0; i < result.length; i++){
+                JSONObject movie = movies.getJSONObject(i);
+                result[i] = movie.getString("poster_path");
+            }
+            return  result;
         }
 
 
