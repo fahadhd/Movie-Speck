@@ -1,0 +1,4 @@
+How to make a movieAPP
+
+1. Depending on if its a phone or table do some logic with the width
+to figure out how many items should appear on screen.
