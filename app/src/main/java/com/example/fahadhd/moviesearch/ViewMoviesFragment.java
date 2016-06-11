@@ -1,6 +1,7 @@
 package com.example.fahadhd.moviesearch;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -34,6 +35,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.prefs.PreferenceChangeListener;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -43,6 +45,19 @@ public class ViewMoviesFragment extends Fragment {
     static int width;
     boolean sortByPop = true;
     static String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
+    static PreferenceChangeListener listener;
+    static SharedPreferences prefs;
+    static boolean sortByFavorites;
+    static  ArrayList<String> posters = new ArrayList<String>();
+
+    private class PreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener{
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            movieGrid.setAdapter(null);
+            onStart();
+        }
+    }
     public ViewMoviesFragment() {
     }
 

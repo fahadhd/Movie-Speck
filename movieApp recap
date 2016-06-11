@@ -1,4 +1,20 @@
 How to make a movieAPP
 
-1. Depending on if its a phone or table do some logic with the width
-to figure out how many items should appear on screen.
+Include a fragment on startup
+In fragments xml set it up as a framelayout with a gridview
+
+Depending on if its a phone or table do some logic with the width
+to figure out how many items should appear on screen. This is done in both the main and fragment classes.
+
+In fragment class
+Create a backround task that extends async
+A. Connects to api and parses the data (done in doInBackground task)
+B. Stores that data into the custome adapter view (done in OnPostExecute)
+(This is all called with taskyoucreated.exectute())
+
+Create a custome adapter called imageadapter that
+A. Returns the imageview of each indivdual poster in the arraylist
+passed in from onPostExectute
+
+Create a Settings class and implement settings for the user by
+A.
