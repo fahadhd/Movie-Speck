@@ -49,6 +49,15 @@ public class ViewMoviesFragment extends Fragment {
     final String LOG_TAG = ViewMoviesFragment.class.getSimpleName();
     static String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
     static  ArrayList<String> posters = new ArrayList<String>();
+    static ArrayList<String> overviews;
+    static ArrayList<String> titles;
+    static ArrayList<String> dates;
+    static ArrayList<String> ratings;
+    static ArrayList<String> vidLinks1;
+    static ArrayList<String> vidLinks2;
+    static ArrayList<String> ids;
+    static ArrayList<Boolean> favorited;
+    static ArrayList<ArrayList<String>> comments;
 
     private class PreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener{
 
@@ -137,7 +146,16 @@ public class ViewMoviesFragment extends Fragment {
         movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(),MovieDetails.class);
+                Intent intent = new Intent(getActivity(),MovieDetails.class).
+                        putExtra("overview",overviews.get(position)).
+                        putExtra("poster", posters.get(position)).
+                        putExtra("title",titles.get(position)).
+                        putExtra("dates",dates.get(position)).
+                        putExtra("rating",ratings.get(position)).
+                        putExtra("youtube",vidLinks1.get(position)).
+                        putExtra("youtube2",vidLinks2.get(position)).
+                        putExtra("comments",comments.get(position)).
+                        putExtra("favorite",favorited.get(position));
                 startActivity(intent);
             }
         });
@@ -173,12 +191,6 @@ public class ViewMoviesFragment extends Fragment {
         }
 
         public String[] getPathsFromAPI(String movieType){
-            while(true){
-                HttpURLConnection urlConnection = null;
-                BufferedReader reader = null;
-                String JSONResult;
-
-                try{
                     String urlString = "http://api.themoviedb.org/3/discover/movie?";
                     //Gets most popular movies currently.
                     if(movieType.equals(getString(R.string.pref_popularity))){
@@ -191,60 +203,107 @@ public class ViewMoviesFragment extends Fragment {
                     else{
                         Log.d(LOG_TAG, "Unit type not found: " + movieType);
                     }
-                    URL url = new URL(urlString);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.connect();
 
-                    InputStream inputStream = urlConnection.getInputStream();
-                    StringBuffer buffer = new StringBuffer();
-
-                    if(inputStream == null){
-                        return null;
-                    }
-
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-                    String line;
-                    while((line = reader.readLine())!= null){
-                        buffer.append(line+"\n");
-                    }
-                    if(buffer.length() == 0){
-                        return null;
-                    }
-                    JSONResult = buffer.toString();
+                    JSONObject JSONResult = getJSONFromInternet(urlString);
                     try{
-                        return getPathsFromJSON(JSONResult);
+                        overviews = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"overview")));
+                        titles = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"original_title")));
+                        ratings = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"vote_average")));
+                        dates = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"release_date")));
+                        ids = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"id")));
+                        getYoutubeLinks(ids);
+
                     }
-                    catch (JSONException e){
-                        return null;
+                    catch (Exception e){
+                        Log.d(LOG_TAG,"Exception "+e);
                     }
-                }
-                catch (Exception e){
-                    continue;
-                }
-                finally {
-                    urlConnection.disconnect();
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+            try {
+                return parseJSON(JSONResult, "poster_path");
             }
+            catch (JSONException e){
+                Log.d(LOG_TAG,"JSON Exception occurred "+e);
+            }
+            return null;
         }
-        public String[] getPathsFromJSON(String JSONResult) throws JSONException{
+
+        public String[] parseJSON(JSONObject root, String info) throws JSONException{
             String[] result;
-            JSONObject root = new JSONObject(JSONResult);
             JSONArray movies = root.getJSONArray("results");
             result = new String[movies.length()];
 
             for(int i = 0; i < result.length; i++){
                 JSONObject movie = movies.getJSONObject(i);
-                result[i] = movie.getString("poster_path");
+                if(info.equals("vote_average")){
+                    Double rating = movie.getDouble(info);
+                    result[i] = rating.toString()+"/10";
+                }
+                else {
+                    result[i] = movie.getString(info);
+                }
             }
             return  result;
         }
+    }
+    public void getYoutubeLinks(ArrayList<String> ids) throws JSONException{
+        String urlString;
+        String link = "https://www.youtube.com/watch?v=";
+            for(int i = 0; i < ids.size(); i++){
+                urlString = "http://api.themoviedb.org/3/movie/" + ids.get(i) +
+                        "/reviews?api_key=" + API_KEY;
+                JSONArray results = getJSONFromInternet(urlString).
+                        getJSONArray("results");
+                vidLinks1.add(link+results.getJSONObject(0).getString("key"));
+                vidLinks2.add(link+results.getJSONObject(1).getString("key"));
+            }
+    }
+    //Returnsa jsonObject when connected to the given url.
+    public JSONObject getJSONFromInternet(String urlString){
+        while(true){
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String JSONResult;
 
+            try{
+                URL url = new URL(urlString);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+
+                if(inputStream == null){
+                    return null;
+                }
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while((line = reader.readLine())!= null){
+                    buffer.append(line+"\n");
+                }
+                if(buffer.length() == 0){
+                    return null;
+                }
+                JSONResult = buffer.toString();
+                try{
+                    return new JSONObject(JSONResult);
+                }
+                catch (JSONException e){
+                    return null;
+                }
+            }
+            catch (Exception e){
+                continue;
+            }
+            finally {
+                urlConnection.disconnect();
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
     }
 
