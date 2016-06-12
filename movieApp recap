@@ -21,3 +21,7 @@ A. Create a new activity called settings activity
 B. Create a xml directory and in it will be pref.xml 
 C. You can do some stuff to the xml and add files to the values directory such as an array to map options to labels used by pref.xml
 D. Write the code that implements all of this (Look this up on youtube)
+Basicaled sharedpreferences does all the work for you and when the user selects an item in the array (aka their preference in the list) all you have to do is find out which preferences is the currented preferences via sharedpreferences = preferencemanager.getactivity blah 
+and then find its string ...sharedpref.getString blah blah and then compare it to the preference getString(R.string.blah)
+
+Create another fragment that is the child of the main activity. This will show the movies details when clicked.

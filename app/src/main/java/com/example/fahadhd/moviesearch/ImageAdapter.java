@@ -55,7 +55,7 @@ public class ImageAdapter extends BaseAdapter {
 
         Drawable d = resizeDrawable(mContext.getResources().getDrawable(R.drawable.movieload));
         Picasso.with(mContext).load("http://image.tmdb.org/t/p/w185/"+
-                paths.get(position)).resize(width,(int)(width*1.5)).placeholder(d).into(imageView);
+                paths.get(position)).resize(width,(int)(width*2)).placeholder(d).into(imageView);
         return imageView;
 
     }

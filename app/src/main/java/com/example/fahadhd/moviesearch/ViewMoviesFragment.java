@@ -1,6 +1,7 @@
 package com.example.fahadhd.moviesearch;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
@@ -121,10 +122,10 @@ public class ViewMoviesFragment extends Fragment {
 
         //If device is a tablet show 6 items else show 3
         if(MainActivity.TABLET){
-            width = size.x/6;
+            width = size.x/4;
         }
         else{
-            width = size.x/3;
+            width = size.x/2;
         }
         ArrayList<String> paths = new ArrayList<String>();
         ImageAdapter adapter = new ImageAdapter(getActivity(),paths,width);
@@ -136,18 +137,17 @@ public class ViewMoviesFragment extends Fragment {
         movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println(position);
+                Intent intent = new Intent(getActivity(),MovieDetails.class);
+                startActivity(intent);
             }
         });
 
         return rootView;
     }
     public class ImageLoadTask extends AsyncTask<String,Void,ArrayList<String>>{
-        ArrayList<String> posters;
         final String LOG_TAG = ImageLoadTask.class.getSimpleName();
         public ImageLoadTask() {
             super();
-            posters = new ArrayList<String>();
         }
         @Override
         //Following is the Strings of the poster paths gotten from the movie database.
@@ -187,10 +187,6 @@ public class ViewMoviesFragment extends Fragment {
                     //Gets highest rated movies instead of most popular
                     else if(movieType.equals(getString(R.string.pref_rating))){
                         urlString+="sort_by=vote_average.desc&vote_count.gte=1000&api_key="+API_KEY;
-                    }
-                    else if(movieType.equals(getString(R.string.pref_favorites))) {
-
-                        return null;
                     }
                     else{
                         Log.d(LOG_TAG, "Unit type not found: " + movieType);
