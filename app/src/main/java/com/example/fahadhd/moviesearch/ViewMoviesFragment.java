@@ -6,6 +6,8 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.net.ConnectivityManagerCompat;
@@ -43,11 +45,8 @@ import java.util.prefs.PreferenceChangeListener;
 public class ViewMoviesFragment extends Fragment {
     GridView movieGrid;
     static int width;
-    boolean sortByPop = true;
+    final String LOG_TAG = ViewMoviesFragment.class.getSimpleName();
     static String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
-    static PreferenceChangeListener listener;
-    static SharedPreferences prefs;
-    static boolean sortByFavorites;
     static  ArrayList<String> posters = new ArrayList<String>();
 
     private class PreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -64,27 +63,38 @@ public class ViewMoviesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        getActivity().setTitle("Most Popular Movies");
+        updateMovies();
+    }
+    public void updateMovies(){
+        SharedPreferences sharedPref = PreferenceManager.
+                getDefaultSharedPreferences(getActivity());
+        String movieType = sharedPref.getString(getString(R.string.pref_movie_key),
+                getString(R.string.pref_popularity));
+        if(movieType.equals(getString(R.string.pref_popularity))){
+            getActivity().setTitle("Most Popular Movies");
+        }
+        else if(movieType.equals(getString(R.string.pref_rating))){
+            getActivity().setTitle("Highest Rated");
+        }
+        else if(movieType.equals(getString(R.string.pref_favorites))){
+            getActivity().setTitle("Favorites");
+        }
+        else{
+            Log.d(LOG_TAG, "Unit type not found: " + movieType);
+        }
 
         if(isNetworkAvailable()){
             //Loading images from internet must be done on a backRound thread and not
             //on the main thread to speed things up.
             movieGrid.setVisibility(movieGrid.VISIBLE);
-            new ImageLoadTask().execute();
+            new ImageLoadTask().execute(movieType);
         }
         else{
-            TextView textView = new TextView(getActivity());
-            FrameLayout layout = (FrameLayout)getActivity().findViewById(R.id.framelayout);
-            textView.setText("No internet connection");
+            //TODO: Set up a screen in case user has no internet
             Toast.makeText(getContext(), "No Internet Connection Available",
                     Toast.LENGTH_SHORT ).show();
-
-            if(layout.getChildCount() == 1) layout.addView(textView);
-
-            movieGrid.setVisibility(movieGrid.GONE);
         }
     }
-
     public boolean isNetworkAvailable(){
         ConnectivityManager connectivityManager =
                 (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -126,18 +136,19 @@ public class ViewMoviesFragment extends Fragment {
 
         return rootView;
     }
-    public class ImageLoadTask extends AsyncTask<Void,Void,ArrayList<String>>{
+    public class ImageLoadTask extends AsyncTask<String,Void,ArrayList<String>>{
         ArrayList<String> posters;
+        final String LOG_TAG = ImageLoadTask.class.getSimpleName();
         public ImageLoadTask() {
             super();
             posters = new ArrayList<String>();
         }
         @Override
         //Following is the Strings of the poster paths gotten from the movie database.
-        protected ArrayList<String> doInBackground(Void... params) {
+        protected ArrayList<String> doInBackground(String... params) {
             while(true){
                 try{
-                    posters = new ArrayList(Arrays.asList(getPathsFromAPI(sortByPop)));
+                    posters = new ArrayList(Arrays.asList(getPathsFromAPI(params[0])));
                     return posters;
                 }
                 catch (Exception e){
@@ -155,7 +166,7 @@ public class ViewMoviesFragment extends Fragment {
             }
         }
 
-        public String[] getPathsFromAPI(boolean popSort){
+        public String[] getPathsFromAPI(String movieType){
             while(true){
                 HttpURLConnection urlConnection = null;
                 BufferedReader reader = null;
@@ -164,13 +175,15 @@ public class ViewMoviesFragment extends Fragment {
                 try{
                     String urlString = "http://api.themoviedb.org/3/discover/movie?";
                     //Gets most popular movies currently.
-                    if(popSort){
+                    if(movieType.equals(getString(R.string.pref_popularity))){
                         urlString+="sort_by=popularity.desc&api_key="+API_KEY;
                     }
                     //Gets highest rated movies instead of most popular
-                    else{
+                    else if(movieType.equals(getString(R.string.pref_rating))){
                         urlString+="sort_by=vote_average.desc&vote_count.gte=1000&api_key="+API_KEY;
-
+                    }
+                    else{
+                        Log.d(LOG_TAG, "Unit type not found: " + movieType);
                     }
                     URL url = new URL(urlString);
                     urlConnection = (HttpURLConnection) url.openConnection();

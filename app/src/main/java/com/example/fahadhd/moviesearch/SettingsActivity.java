@@ -15,7 +15,7 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
-        bindPreferenceSummaryToValue(findPreference(sortBy));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_movie_key)));
     }
 
     @Override

@@ -17,4 +17,7 @@ A. Returns the imageview of each indivdual poster in the arraylist
 passed in from onPostExectute
 
 Create a Settings class and implement settings for the user by
-A.
+A. Create a new activity called settings activity
+B. Create a xml directory and in it will be pref.xml 
+C. You can do some stuff to the xml and add files to the values directory such as an array to map options to labels used by pref.xml
+D. Write the code that implements all of this (Look this up on youtube)

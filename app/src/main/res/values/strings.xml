@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">MovieSearch</string>
     <string name="action_settings">Settings</string>
+    <string name="pref_movie_key">movieType</string>
     <string name="pref_label_popularity">Popularity</string>
     <string name="pref_label_rating">Rating</string>
+    <string name="pref_label_favorites">Favorites</string>
     <string name="pref_popularity">popularity</string>
     <string name="pref_rating">rating</string>
+    <string name="pref_favorites">favorites</string>
 </resources>

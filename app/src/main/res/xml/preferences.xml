@@ -2,9 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
         android:title="Sort Movies By"
-        android:key="sortBy"
+        android:key="@string/pref_movie_key"
         android:defaultValue="@string/pref_popularity"
         android:entries="@array/pref_options"
-        android:entryValues="@array/pref_options"
+        android:entryValues="@array/pref_value"
         />
 </PreferenceScreen>
