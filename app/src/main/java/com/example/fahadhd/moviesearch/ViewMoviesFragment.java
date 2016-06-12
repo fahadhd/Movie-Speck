@@ -78,6 +78,12 @@ public class ViewMoviesFragment extends Fragment {
         }
         else if(movieType.equals(getString(R.string.pref_favorites))){
             getActivity().setTitle("Favorites");
+            TextView textView = new TextView(getActivity());
+            FrameLayout layout = (FrameLayout)getActivity().findViewById(R.id.fragment);
+            textView.setText("You have no favorited movies currently");
+            layout.addView(textView);
+            movieGrid.setVisibility(movieGrid.GONE);
+            return;
         }
         else{
             Log.d(LOG_TAG, "Unit type not found: " + movieType);
@@ -181,6 +187,10 @@ public class ViewMoviesFragment extends Fragment {
                     //Gets highest rated movies instead of most popular
                     else if(movieType.equals(getString(R.string.pref_rating))){
                         urlString+="sort_by=vote_average.desc&vote_count.gte=1000&api_key="+API_KEY;
+                    }
+                    else if(movieType.equals(getString(R.string.pref_favorites))) {
+
+                        return null;
                     }
                     else{
                         Log.d(LOG_TAG, "Unit type not found: " + movieType);
