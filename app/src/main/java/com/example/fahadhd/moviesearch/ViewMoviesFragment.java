@@ -249,7 +249,7 @@ public class ViewMoviesFragment extends Fragment {
         String link = "https://www.youtube.com/watch?v=";
             for(int i = 0; i < ids.size(); i++){
                 urlString = "http://api.themoviedb.org/3/movie/" + ids.get(i) +
-                        "/reviews?api_key=" + API_KEY;
+                        "/videos?api_key=" + API_KEY;
                 JSONArray results = getJSONFromInternet(urlString).
                         getJSONArray("results");
                 vidLinks1.add(link+results.getJSONObject(0).getString("key"));

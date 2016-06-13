@@ -10,7 +10,9 @@
     tools:showIn="@layout/activity_movie_details"
     android:minWidth="20dp"
     android:minHeight="20dp">
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,4 +23,5 @@
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
         android:src="@drawable/poster" />
+        ></ScrollView>
 </RelativeLayout>
