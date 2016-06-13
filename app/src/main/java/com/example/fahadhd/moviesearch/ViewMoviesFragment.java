@@ -56,7 +56,7 @@ public class ViewMoviesFragment extends Fragment {
     static ArrayList<String> vidLinks1;
     static ArrayList<String> vidLinks2;
     static ArrayList<String> ids;
-    static ArrayList<Boolean> favorited;
+    static ArrayList<Boolean> favorites;
     static ArrayList<ArrayList<String>> comments;
 
     private class PreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -155,7 +155,7 @@ public class ViewMoviesFragment extends Fragment {
                         putExtra("youtube",vidLinks1.get(position)).
                         putExtra("youtube2",vidLinks2.get(position)).
                         putExtra("comments",comments.get(position)).
-                        putExtra("favorite",favorited.get(position));
+                        putExtra("favorite",favorites.get(position));
                 startActivity(intent);
             }
         });
