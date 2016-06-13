@@ -38,6 +38,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.prefs.PreferenceChangeListener;
 
 /**
@@ -53,8 +55,8 @@ public class ViewMoviesFragment extends Fragment {
     static ArrayList<String> titles;
     static ArrayList<String> dates;
     static ArrayList<String> ratings;
-    static ArrayList<String> vidLinks1;
-    static ArrayList<String> vidLinks2;
+    static ArrayList<String> vidLink1;
+    static ArrayList<String> vidLink2;
     static ArrayList<String> ids;
     static ArrayList<Boolean> favorites;
     static ArrayList<ArrayList<String>> comments;
@@ -146,16 +148,14 @@ public class ViewMoviesFragment extends Fragment {
         movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                favorites = new ArrayList<Boolean>();
+                Collections.fill(favorites, Boolean.FALSE);
                 Intent intent = new Intent(getActivity(),MovieDetails.class).
                         putExtra("overview",overviews.get(position)).
                         putExtra("poster", posters.get(position)).
                         putExtra("title",titles.get(position)).
                         putExtra("dates",dates.get(position)).
-                        putExtra("rating",ratings.get(position)).
-                        putExtra("youtube",vidLinks1.get(position)).
-                        putExtra("youtube2",vidLinks2.get(position)).
-                        putExtra("comments",comments.get(position)).
-                        putExtra("favorite",favorites.get(position));
+                        putExtra("rating",ratings.get(position));
                 startActivity(intent);
             }
         });
@@ -212,6 +212,7 @@ public class ViewMoviesFragment extends Fragment {
                         dates = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"release_date")));
                         ids = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"id")));
                         getYoutubeLinks(ids);
+                        System.out.print(ratings);
 
                     }
                     catch (Exception e){
@@ -252,8 +253,8 @@ public class ViewMoviesFragment extends Fragment {
                         "/videos?api_key=" + API_KEY;
                 JSONArray results = getJSONFromInternet(urlString).
                         getJSONArray("results");
-                vidLinks1.add(link+results.getJSONObject(0).getString("key"));
-                vidLinks2.add(link+results.getJSONObject(1).getString("key"));
+                vidLink1.add(link+results.getJSONObject(0).getString("key"));
+                vidLink2.add(link+results.getJSONObject(1).getString("key"));
             }
     }
     //Returnsa jsonObject when connected to the given url.
