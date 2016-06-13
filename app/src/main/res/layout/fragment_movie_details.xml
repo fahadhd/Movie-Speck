@@ -101,7 +101,7 @@
                 <Button
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text = "Watch Trailer 1"
+                    android:text = "Watch The Trailer"
                     android:paddingLeft = "15dp"
                     android:paddingRight = "0dp"
                     android:paddingTop = "0dp"
@@ -110,18 +110,7 @@
                     android:gravity = "center_vertical"
                     android:onClick = "trailer1"
                     />
-                <Button
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text = "Watch Trailer 2"
-                    android:paddingLeft = "15dp"
-                    android:paddingRight = "0dp"
-                    android:paddingTop = "0dp"
-                    android:paddingBottom = "0dp"
-                    android:id = "@+id/trailer2"
-                    android:gravity = "center_vertical"
-                    android:onClick = "trailer2"
-                    />
+
                 <View
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"

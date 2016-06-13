@@ -55,8 +55,7 @@ public class ViewMoviesFragment extends Fragment {
     static ArrayList<String> titles;
     static ArrayList<String> dates;
     static ArrayList<String> ratings;
-    static ArrayList<String> vidLink1;
-    static ArrayList<String> vidLink2;
+    static ArrayList<String> vidLink1 = new ArrayList<String>();
     static ArrayList<String> ids;
     static ArrayList<Boolean> favorites;
     static ArrayList<ArrayList<String>> comments;
@@ -155,7 +154,8 @@ public class ViewMoviesFragment extends Fragment {
                         putExtra("poster", posters.get(position)).
                         putExtra("title",titles.get(position)).
                         putExtra("dates",dates.get(position)).
-                        putExtra("rating",ratings.get(position));
+                        putExtra("rating",ratings.get(position)).
+                        putExtra("youtube1",vidLink1.get(position));
                 startActivity(intent);
             }
         });
@@ -212,7 +212,6 @@ public class ViewMoviesFragment extends Fragment {
                         dates = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"release_date")));
                         ids = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"id")));
                         getYoutubeLinks(ids);
-                        System.out.print(ratings);
 
                     }
                     catch (Exception e){
@@ -248,13 +247,13 @@ public class ViewMoviesFragment extends Fragment {
     public void getYoutubeLinks(ArrayList<String> ids) throws JSONException{
         String urlString;
         String link = "https://www.youtube.com/watch?v=";
-            for(int i = 0; i < ids.size(); i++){
+            for(int i = 0; i < ids.size()-1; i++){
                 urlString = "http://api.themoviedb.org/3/movie/" + ids.get(i) +
                         "/videos?api_key=" + API_KEY;
                 JSONArray results = getJSONFromInternet(urlString).
                         getJSONArray("results");
-                vidLink1.add(link+results.getJSONObject(0).getString("key"));
-                vidLink2.add(link+results.getJSONObject(1).getString("key"));
+                String key1 = results.getJSONObject(0).getString("key");
+                vidLink1.set(i,link+key1);
             }
     }
     //Returnsa jsonObject when connected to the given url.

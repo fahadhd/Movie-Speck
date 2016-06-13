@@ -5,15 +5,18 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.support.v7.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -25,7 +28,6 @@ import java.util.ArrayList;
  */
 public class MovieDetailsFragment extends Fragment {
     public static String youtube1;
-    public static String youtube2;
     public static String overview;
     public static String rating;
     public static String date;
@@ -35,6 +37,7 @@ public class MovieDetailsFragment extends Fragment {
     public static boolean favorite;
     public static ArrayList<String> comments;
     public static Button b;
+    private ShareActionProvider mShareActionProvider;
 
     public MovieDetailsFragment() {
         setHasOptionsMenu(true);
@@ -42,7 +45,24 @@ public class MovieDetailsFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_movie_details,menu);
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+        if(mShareActionProvider != null){
+            mShareActionProvider.setShareIntent(createShareIntent());
+        }
+        else{
+
+        }
+    }
+
+    private Intent createShareIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out this trailer for " + title + ": " +
+                "https://www.youtube.com/watch?v=" + youtube1);
+        return shareIntent;
     }
 
     @Override
@@ -78,10 +98,7 @@ public class MovieDetailsFragment extends Fragment {
             ;
         }
         if (intent != null && intent.hasExtra("youtube1")) {
-            youtube1 = intent.getStringExtra("vidLink1");
-        }
-        if (intent != null && intent.hasExtra("youtube2")) {
-            youtube2 = intent.getStringExtra("vidLink2");
+            youtube1 = intent.getStringExtra("youtube1");
         }
         if (intent != null && intent.hasExtra("comments")) {
             comments = intent.getStringArrayListExtra("comments");
