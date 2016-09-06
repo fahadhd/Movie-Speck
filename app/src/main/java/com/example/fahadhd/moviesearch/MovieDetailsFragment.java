@@ -6,6 +6,7 @@ import android.graphics.PorterDuff;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,11 +28,12 @@ import java.util.ArrayList;
  * A placeholder fragment containing a simple view.
  */
 public class MovieDetailsFragment extends Fragment {
+    Movie currentMovie;
+    public static final String TAG = MovieDetailsFragment.class.getSimpleName();
     public static String youtube1;
     public static String overview;
     public static String rating;
     public static String date;
-    public static String review;
     public static String title;
     public static String poster;
     public static boolean favorite;
@@ -72,6 +74,12 @@ public class MovieDetailsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
         Intent intent = getActivity().getIntent();
         getActivity().setTitle("Movie Details");
+
+        if(intent != null && intent.hasExtra(ViewMoviesFragment.MOVIE_KEY)){
+            currentMovie = (Movie)intent.getSerializableExtra(ViewMoviesFragment.MOVIE_KEY);
+            Log.v(TAG,currentMovie.movieTitle);
+           
+        }
 
         if (intent != null && intent.hasExtra("overview")) {
             overview = intent.getStringExtra("overview");

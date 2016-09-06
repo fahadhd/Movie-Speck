@@ -47,8 +47,10 @@ import java.util.prefs.PreferenceChangeListener;
  */
 public class ViewMoviesFragment extends Fragment {
     GridView movieGrid;
+    ArrayList<Movie> movies = new ArrayList<>();
     static int width;
     final String LOG_TAG = ViewMoviesFragment.class.getSimpleName();
+    public static final String MOVIE_KEY = "current_movie";
     static String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
     static  ArrayList<String> posters = new ArrayList<String>();
     static ArrayList<String> overviews;
@@ -142,6 +144,7 @@ public class ViewMoviesFragment extends Fragment {
         movieGrid = (GridView) rootView.findViewById(R.id.movieGrid);
         movieGrid.setColumnWidth(width);
         movieGrid.setAdapter(adapter);
+        movies.size();
 
         //Listen for a user click on a movie poster
         movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -155,7 +158,8 @@ public class ViewMoviesFragment extends Fragment {
                         putExtra("title",titles.get(position)).
                         putExtra("dates",dates.get(position)).
                         putExtra("rating",ratings.get(position)).
-                        putExtra("youtube1",vidLink1.get(position));
+                        putExtra("youtube1",vidLink1.get(position)).
+                        putExtra(MOVIE_KEY,movies.get(position));
                 startActivity(intent);
             }
         });
@@ -211,6 +215,8 @@ public class ViewMoviesFragment extends Fragment {
                         ratings = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"vote_average")));
                         dates = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"release_date")));
                         ids = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"id")));
+                        movies.addAll(getMovies(JSONResult));
+                        movies.size();
                         getYoutubeLinks(ids);
 
                     }
@@ -244,6 +250,36 @@ public class ViewMoviesFragment extends Fragment {
             return  result;
         }
     }
+
+    public ArrayList<Movie> getMovies(JSONObject root) throws JSONException{
+        ArrayList<Movie> movies = new ArrayList<>();
+        JSONArray movieParser = root.getJSONArray("results");
+        JSONArray results;
+        String link,url, youtubeKey;
+        for(int i = 0; i < movieParser.length(); i++){
+            JSONObject movie = movieParser.getJSONObject(i);
+            link = "https://www.youtube.com/watch?v=";
+            url = "http://api.themoviedb.org/3/movie/" + movie.getString("id") +
+                    "/videos?api_key=" + API_KEY;
+            results = getJSONFromInternet(url).
+                    getJSONArray("results");
+            youtubeKey = results.getJSONObject(0).getString("key");
+
+            movies.add(new Movie(
+                    movie.getString("poster_path"),
+                    movie.getString("overview"),
+                    movie.getString("original_title"),
+                    movie.getString("release_date"),
+                    movie.getDouble("vote_average"),
+                    movie.getString("id"),
+                    link+youtubeKey
+            ));
+
+        }
+        return movies;
+    }
+
+
     public void getYoutubeLinks(ArrayList<String> ids) throws JSONException{
         String urlString;
         String link = "https://www.youtube.com/watch?v=";
@@ -253,10 +289,10 @@ public class ViewMoviesFragment extends Fragment {
                 JSONArray results = getJSONFromInternet(urlString).
                         getJSONArray("results");
                 String key1 = results.getJSONObject(0).getString("key");
-                vidLink1.set(i,link+key1);
+                vidLink1.add(link+key1);
             }
     }
-    //Returnsa jsonObject when connected to the given url.
+    //Returns jsonObject when connected to the given url.
     public JSONObject getJSONFromInternet(String urlString){
         while(true){
             HttpURLConnection urlConnection = null;
@@ -275,7 +311,6 @@ public class ViewMoviesFragment extends Fragment {
                 if(inputStream == null){
                     return null;
                 }
-
                 reader = new BufferedReader(new InputStreamReader(inputStream));
                 String line;
                 while((line = reader.readLine())!= null){
