@@ -78,33 +78,19 @@ public class MovieDetailsFragment extends Fragment {
         if(intent != null && intent.hasExtra(ViewMoviesFragment.MOVIE_KEY)){
             currentMovie = (Movie)intent.getSerializableExtra(ViewMoviesFragment.MOVIE_KEY);
             Log.v(TAG,currentMovie.movieTitle);
-           
-        }
+            ((TextView) rootView.findViewById(R.id.overview)).setText(currentMovie.getOverview());
+            ((TextView) rootView.findViewById(R.id.title)).setText(currentMovie.getMovieTitle());
+            ((TextView) rootView.findViewById(R.id.rating)).setText(currentMovie.getRating()+"/10");
+            ((TextView) rootView.findViewById(R.id.date)).setText(currentMovie.getReleaseDate());
 
-        if (intent != null && intent.hasExtra("overview")) {
-            overview = intent.getStringExtra("overview");
-            ((TextView) rootView.findViewById(R.id.overview)).setText(overview);
-        }
-        if (intent != null && intent.hasExtra("title")) {
-            title = intent.getStringExtra("title");
-            ((TextView) rootView.findViewById(R.id.title)).setText(title);
-        }
-        if (intent != null && intent.hasExtra("rating")) {
-            rating = intent.getStringExtra("rating");
-            ((TextView) rootView.findViewById(R.id.rating)).setText(rating);
-        }
-        if (intent != null && intent.hasExtra("dates")) {
-            date = intent.getStringExtra("dates");
-            ((TextView) rootView.findViewById(R.id.date)).setText(date);
-        }
-        if (intent != null && intent.hasExtra("poster")) {
-            poster = intent.getStringExtra("poster");
             int width = ViewMoviesFragment.width;
             ImageView posterImage = (ImageView) rootView.findViewById(R.id.poster);
-            Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185/" + poster).
-                    resize(width, (int) (width * 2)).into(posterImage);
-            ;
+            Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185/" + currentMovie.getPosterURL()).
+                    resize(width, (width * 2)).into(posterImage);
+
         }
+
+
         if (intent != null && intent.hasExtra("youtube1")) {
             youtube1 = intent.getStringExtra("youtube1");
         }
