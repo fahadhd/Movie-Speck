@@ -30,12 +30,6 @@ import java.util.ArrayList;
 public class MovieDetailsFragment extends Fragment {
     Movie currentMovie;
     public static final String TAG = MovieDetailsFragment.class.getSimpleName();
-    public static String youtube1;
-    public static String overview;
-    public static String rating;
-    public static String date;
-    public static String title;
-    public static String poster;
     public static boolean favorite;
     public static ArrayList<String> comments;
     public static Button b;
@@ -62,15 +56,14 @@ public class MovieDetailsFragment extends Fragment {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out this trailer for " + title + ": " +
-                "https://www.youtube.com/watch?v=" + youtube1);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out this trailer for " + currentMovie.movieTitle + ": " +
+                "https://www.youtube.com/watch?v=" + currentMovie.getYoutubeLink());
         return shareIntent;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ArrayList<String> posters = ViewMoviesFragment.posters;
         View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
         Intent intent = getActivity().getIntent();
         getActivity().setTitle("Movie Details");
@@ -89,11 +82,7 @@ public class MovieDetailsFragment extends Fragment {
                     resize(width, (width * 2)).into(posterImage);
 
         }
-
-
-        if (intent != null && intent.hasExtra("youtube1")) {
-            youtube1 = intent.getStringExtra("youtube1");
-        }
+      
         if (intent != null && intent.hasExtra("comments")) {
             comments = intent.getStringArrayListExtra("comments");
             for (int i = 0; i < comments.size(); i++) {

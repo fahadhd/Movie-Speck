@@ -19,24 +19,24 @@ import java.util.ArrayList;
  */
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
-    private ArrayList<String> paths;
+    private ArrayList<Movie> movies;
     private int width;
 
-    public ImageAdapter(Context mContext, ArrayList<String> paths, int width) {
+    public ImageAdapter(Context mContext, ArrayList<Movie> movies, int width) {
         this.mContext = mContext;
-        this.paths = paths;
+        this.movies = movies;
         this.width = width;
     }
 
 
     @Override
     public int getCount() {
-        return paths.size();
+        return movies.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return paths.get(position);
+        return movies.get(position);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ImageAdapter extends BaseAdapter {
 
         Drawable d = resizeDrawable(mContext.getResources().getDrawable(R.drawable.movieload));
         Picasso.with(mContext).load("http://image.tmdb.org/t/p/w185/"+
-                paths.get(position)).resize(width,(int)(width*2)).placeholder(d).into(imageView);
+                movies.get(position).getPosterURL()).resize(width,(int)(width*2)).placeholder(d).into(imageView);
         return imageView;
 
     }

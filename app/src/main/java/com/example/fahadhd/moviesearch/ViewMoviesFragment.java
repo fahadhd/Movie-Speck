@@ -48,30 +48,12 @@ import java.util.prefs.PreferenceChangeListener;
 public class ViewMoviesFragment extends Fragment {
     GridView movieGrid;
     ArrayList<Movie> movies = new ArrayList<>();
+    ImageAdapter adapter;
     static int width;
     final String LOG_TAG = ViewMoviesFragment.class.getSimpleName();
     public static final String MOVIE_KEY = "current_movie";
-    static String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
-    static  ArrayList<String> posters = new ArrayList<String>();
-    static ArrayList<String> overviews;
-    static ArrayList<String> titles;
-    static ArrayList<String> dates;
-    static ArrayList<String> ratings;
-    static ArrayList<String> vidLink1 = new ArrayList<String>();
-    static ArrayList<String> ids;
-    static ArrayList<Boolean> favorites;
-    static ArrayList<ArrayList<String>> comments;
-
-    private class PreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener{
-
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            movieGrid.setAdapter(null);
-            onStart();
-        }
-    }
-    public ViewMoviesFragment() {
-    }
+    public static final String API_KEY = "3d265a7f8684cf8cb974b04326f6b5fa";
+    public static ArrayList<Boolean> favorites;
 
     @Override
     public void onStart() {
@@ -139,8 +121,7 @@ public class ViewMoviesFragment extends Fragment {
         else{
             width = size.x/2;
         }
-        ArrayList<String> paths = new ArrayList<String>();
-        ImageAdapter adapter = new ImageAdapter(getActivity(),paths,width);
+        adapter = new ImageAdapter(getActivity(),movies,width);
         movieGrid = (GridView) rootView.findViewById(R.id.movieGrid);
         movieGrid.setColumnWidth(width);
         movieGrid.setAdapter(adapter);
@@ -153,12 +134,6 @@ public class ViewMoviesFragment extends Fragment {
                 favorites = new ArrayList<Boolean>();
                 Collections.fill(favorites, Boolean.FALSE);
                 Intent intent = new Intent(getActivity(),MovieDetails.class).
-                        putExtra("overview",overviews.get(position)).
-                        putExtra("poster", posters.get(position)).
-                        putExtra("title",titles.get(position)).
-                        putExtra("dates",dates.get(position)).
-                        putExtra("rating",ratings.get(position)).
-                        putExtra("youtube1",vidLink1.get(position)).
                         putExtra(MOVIE_KEY,movies.get(position));
                 startActivity(intent);
             }
@@ -166,180 +141,128 @@ public class ViewMoviesFragment extends Fragment {
 
         return rootView;
     }
-    public class ImageLoadTask extends AsyncTask<String,Void,ArrayList<String>>{
+    public class ImageLoadTask extends AsyncTask<String,Void,ArrayList<Movie>> {
         final String LOG_TAG = ImageLoadTask.class.getSimpleName();
+
         public ImageLoadTask() {
             super();
         }
+
         @Override
         //Following is the Strings of the poster paths gotten from the movie database.
-        protected ArrayList<String> doInBackground(String... params) {
-            while(true){
-                try{
-                    posters = new ArrayList(Arrays.asList(getPathsFromAPI(params[0])));
-                    return posters;
-                }
-                catch (Exception e){
-                    continue;
-                }
-            }
+        protected ArrayList<Movie> doInBackground(String... params) {
+            return getPathsFromAPI(params[0]);
         }
 
         @Override
-        //Remember onPostExectute fills the adapter with data that was gathered during execution.
-        protected void onPostExecute(ArrayList<String> result) {
-            if(result != null && getContext() != null){
-                ImageAdapter imageAdapter = new ImageAdapter(getContext(),result,width);
-                movieGrid.setAdapter(imageAdapter);
+        //Remember onPostExecute fills the adapter with data that was gathered during execution.
+        protected void onPostExecute(ArrayList<Movie> result) {
+            if (result != null && getContext() != null) {
+                movies.clear();
+                movies.addAll(result);
+                adapter.notifyDataSetChanged();
+
             }
         }
 
-        public String[] getPathsFromAPI(String movieType){
-                    String urlString = "http://api.themoviedb.org/3/discover/movie?";
-                    //Gets most popular movies currently.
-                    if(movieType.equals(getString(R.string.pref_popularity))){
-                        urlString+="sort_by=popularity.desc&api_key="+API_KEY;
-                    }
-                    //Gets highest rated movies instead of most popular
-                    else if(movieType.equals(getString(R.string.pref_rating))){
-                        urlString+="sort_by=vote_average.desc&vote_count.gte=1000&api_key="+API_KEY;
-                    }
-                    else{
-                        Log.d(LOG_TAG, "Unit type not found: " + movieType);
-                    }
-
-                    JSONObject JSONResult = getJSONFromInternet(urlString);
-                    try{
-                        overviews = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"overview")));
-                        titles = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"original_title")));
-                        ratings = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"vote_average")));
-                        dates = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"release_date")));
-                        ids = new ArrayList<String>(Arrays.asList(parseJSON(JSONResult,"id")));
-                        movies.addAll(getMovies(JSONResult));
-                        movies.size();
-                        getYoutubeLinks(ids);
-
-                    }
-                    catch (Exception e){
-                        Log.d(LOG_TAG,"Exception "+e);
-                    }
-            try {
-                return parseJSON(JSONResult, "poster_path");
+        public ArrayList<Movie> getPathsFromAPI(String movieType) {
+            String urlString = "http://api.themoviedb.org/3/discover/movie?";
+            //Gets most popular movies currently.
+            if (movieType.equals(getString(R.string.pref_popularity))) {
+                urlString += "sort_by=popularity.desc&api_key=" + API_KEY;
             }
-            catch (JSONException e){
-                Log.d(LOG_TAG,"JSON Exception occurred "+e);
+            //Gets highest rated movies instead of most popular
+            else if (movieType.equals(getString(R.string.pref_rating))) {
+                urlString += "sort_by=vote_average.desc&vote_count.gte=1000&api_key=" + API_KEY;
+            } else {
+                Log.d(LOG_TAG, "Unit type not found: " + movieType);
+            }
+
+            JSONObject JSONResult = getJSONFromInternet(urlString);
+            try {
+                return getMovies(JSONResult);
+            } catch (Exception e) {
+                Log.d(LOG_TAG, "Exception " + e);
             }
             return null;
         }
 
-        public String[] parseJSON(JSONObject root, String info) throws JSONException{
-            String[] result;
-            JSONArray movies = root.getJSONArray("results");
-            result = new String[movies.length()];
 
-            for(int i = 0; i < result.length; i++){
-                JSONObject movie = movies.getJSONObject(i);
-                if(info.equals("vote_average")){
-                    Double rating = movie.getDouble(info);
-                    result[i] = rating.toString()+"/10";
-                }
-                else {
-                    result[i] = movie.getString(info);
-                }
-            }
-            return  result;
-        }
-    }
-
-    public ArrayList<Movie> getMovies(JSONObject root) throws JSONException{
-        ArrayList<Movie> movies = new ArrayList<>();
-        JSONArray movieParser = root.getJSONArray("results");
-        JSONArray results;
-        String link,url, youtubeKey;
-        for(int i = 0; i < movieParser.length(); i++){
-            JSONObject movie = movieParser.getJSONObject(i);
-            link = "https://www.youtube.com/watch?v=";
-            url = "http://api.themoviedb.org/3/movie/" + movie.getString("id") +
-                    "/videos?api_key=" + API_KEY;
-            results = getJSONFromInternet(url).
-                    getJSONArray("results");
-            youtubeKey = results.getJSONObject(0).getString("key");
-
-            movies.add(new Movie(
-                    movie.getString("poster_path"),
-                    movie.getString("overview"),
-                    movie.getString("original_title"),
-                    movie.getString("release_date"),
-                    movie.getDouble("vote_average"),
-                    movie.getString("id"),
-                    link+youtubeKey
-            ));
-
-        }
-        return movies;
-    }
-
-
-    public void getYoutubeLinks(ArrayList<String> ids) throws JSONException{
-        String urlString;
-        String link = "https://www.youtube.com/watch?v=";
-            for(int i = 0; i < ids.size()-1; i++){
-                urlString = "http://api.themoviedb.org/3/movie/" + ids.get(i) +
+        public ArrayList<Movie> getMovies(JSONObject root) throws JSONException {
+            ArrayList<Movie> movies = new ArrayList<>();
+            JSONArray movieParser = root.getJSONArray("results");
+            JSONArray results;
+            String link, url, youtubeKey;
+            for (int i = 0; i < movieParser.length(); i++) {
+                JSONObject movie = movieParser.getJSONObject(i);
+                link = "https://www.youtube.com/watch?v=";
+                url = "http://api.themoviedb.org/3/movie/" + movie.getString("id") +
                         "/videos?api_key=" + API_KEY;
-                JSONArray results = getJSONFromInternet(urlString).
+                results = getJSONFromInternet(url).
                         getJSONArray("results");
-                String key1 = results.getJSONObject(0).getString("key");
-                vidLink1.add(link+key1);
-            }
-    }
-    //Returns jsonObject when connected to the given url.
-    public JSONObject getJSONFromInternet(String urlString){
-        while(true){
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String JSONResult;
+                youtubeKey = results.getJSONObject(0).getString("key");
 
-            try{
-                URL url = new URL(urlString);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
+                movies.add(new Movie(
+                        movie.getString("poster_path"),
+                        movie.getString("overview"),
+                        movie.getString("original_title"),
+                        movie.getString("release_date"),
+                        movie.getDouble("vote_average"),
+                        movie.getString("id"),
+                        link + youtubeKey
+                ));
 
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-
-                if(inputStream == null){
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while((line = reader.readLine())!= null){
-                    buffer.append(line+"\n");
-                }
-                if(buffer.length() == 0){
-                    return null;
-                }
-                JSONResult = buffer.toString();
-                try{
-                    return new JSONObject(JSONResult);
-                }
-                catch (JSONException e){
-                    return null;
-                }
             }
-            catch (Exception e){
-                continue;
-            }
-            finally {
-                urlConnection.disconnect();
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            return movies;
         }
 
+
+        //Returns jsonObject when connected to the given url.
+        public JSONObject getJSONFromInternet(String urlString) {
+            while (true) {
+                HttpURLConnection urlConnection = null;
+                BufferedReader reader = null;
+                String JSONResult;
+
+                try {
+                    URL url = new URL(urlString);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setRequestMethod("GET");
+                    urlConnection.connect();
+
+                    InputStream inputStream = urlConnection.getInputStream();
+                    StringBuffer buffer = new StringBuffer();
+
+                    if (inputStream == null) {
+                        return null;
+                    }
+                    reader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line + "\n");
+                    }
+                    if (buffer.length() == 0) {
+                        return null;
+                    }
+                    JSONResult = buffer.toString();
+                    try {
+                        return new JSONObject(JSONResult);
+                    } catch (JSONException e) {
+                        return null;
+                    }
+                } catch (Exception e) {
+                    continue;
+                } finally {
+                    urlConnection.disconnect();
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        }
     }
 
 }

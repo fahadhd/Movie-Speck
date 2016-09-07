@@ -53,9 +53,10 @@ public class MovieDetails extends AppCompatActivity {
             b.getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
         }
     }
+    //TODO: PUT THIS IN MOVIEDETAILS FRAGMENT CLASS
     public void trailer1(View v){
-        Intent openLink = new Intent(Intent.ACTION_VIEW, Uri.parse(MovieDetailsFragment.youtube1));
-        startActivity(openLink);
+        //Intent openLink = new Intent(Intent.ACTION_VIEW, Uri.parse(MovieDetailsFragment.youtube1));
+        //startActivity(openLink);
     }
 
 }
